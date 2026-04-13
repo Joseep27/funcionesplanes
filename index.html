@@ -3,7 +3,150 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Funciones PAM IF / PTE / PAM RI</title><!DOCTYPE html>
+<title>Funciones PAM IF / PTE / PAM RI</<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Funciones PAM IF / PTE / PAM RI</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#f9f9f7;color:#1a1a1a;padding:1rem;min-height:100vh}
+.tabs{display:flex;gap:4px;padding:0 0 0;border-bottom:1px solid #e0e0d8;flex-wrap:wrap;margin-bottom:0}
+.tab{padding:8px 22px;font-size:13px;font-weight:500;border-radius:8px 8px 0 0;cursor:pointer;border:1px solid transparent;color:#666;background:transparent;transition:all .15s}
+.tab.active{background:#fff;border-color:#e0e0d8;border-bottom-color:#fff;color:#1a1a1a}
+.tab:hover:not(.active){background:#f0f0ea}
+.page{display:none;padding:1rem 0}
+.page.active{display:flex;flex-direction:column;height:calc(100vh - 60px)}
+.header-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-shrink:0}
+.stats{display:flex;gap:16px;font-size:12px;color:#888}
+.stats span{font-weight:500;color:#1a1a1a}
+.stat-wrong span{color:#a32d2d}
+.reset-btn{padding:6px 14px;font-size:12px;border-radius:8px;border:1px solid #ccc;background:transparent;cursor:pointer;color:#666}
+.reset-btn:hover{background:#f0f0ea}
+.table-wrap{flex:1;overflow-x:auto;overflow-y:hidden;margin-bottom:1rem;min-height:0}
+.col-table{display:flex;gap:0;border:1px solid #e0e0d8;border-radius:10px;overflow:hidden;height:100%;min-width:max-content;width:100%;align-items:stretch}
+.col{flex:1;min-width:160px;display:flex;flex-direction:column;border-right:1px solid #e0e0d8}
+.col:last-child{border-right:none}
+.col-header{font-size:11px;font-weight:600;color:#444;background:#f0f0ea;padding:10px 8px;text-align:center;border-bottom:1px solid #e0e0d8;line-height:1.3;flex-shrink:0}
+.drop-zone{flex:1;min-height:0;padding:8px;display:flex;flex-direction:column;gap:6px;background:#fff;overflow-y:auto}
+.drop-zone.dragover{background:#e6f1fb}
+.divider{border:none;border-top:1px dashed #ccc;margin:0.75rem 0;flex-shrink:0}
+.bank-section{flex-shrink:0}
+.bank-title{font-size:12px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+.bank{display:flex;flex-wrap:wrap;gap:6px;min-height:56px;padding:10px;border-radius:8px;border:1px dashed #ccc;background:#f0f0ea}
+.card{background:#fff;border:1px solid #e0e0d8;border-radius:8px;padding:8px 10px;font-size:11px;line-height:1.4;cursor:grab;color:#1a1a1a;user-select:none;transition:box-shadow .1s}
+.card:hover{box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.card:active{cursor:grabbing}
+.card.dragging{opacity:.4}
+.card.correct{background:#eaf3de;border-color:#7ab648;color:#3b6d11}
+.card.wrong{background:#fcebeb;border-color:#e24b4a;color:#a32d2d}
+.remove-btn{float:right;font-size:10px;cursor:pointer;padding:1px 4px;border-radius:3px;border:1px solid #ccc;background:transparent;color:#888;margin-left:4px;line-height:1.3}
+.remove-btn:hover{background:#f0f0ea}
+</style>
+</head>
+<body>
+
+<div class="tabs">
+  <button class="tab active" onclick="showPage('pamif')">PAM IF</button>
+  <button class="tab" onclick="showPage('pte')">PTE</button>
+  <button class="tab" onclick="showPage('pamri')">PAM RI</button>
+</div>
+<div id="pamif" class="page active"></div>
+<div id="pte" class="page"></div>
+<div id="pamri" class="page"></div>
+
+<script>
+const DATA={pamif:{zones:[{id:'cecopal',label:'CECOPAL'},{id:'dir',label:'Dirección PAM IF'},{id:'dirTec',label:'Dirección Técnica'},{id:'comite',label:'Comité Asesor'},{id:'cecom',label:'Central Comunicaciones'},{id:'pma',label:'Dirección PMA'}],cards:[{id:'c1',text:'Gestionar y canalizar los recursos municipales de forma coordinada con el PMA.',zone:'cecopal'},{id:'c2',text:'Coordinar el sistema de avisos a la población y otras medidas de protección.',zone:'cecopal'},{id:'c3',text:'Llevar a término todas las medidas preventivas que procedan.',zone:'dir'},{id:'c4',text:'Recibir la información del siniestro y activar formalmente el PAM IF.',zone:'dir'},{id:'c5',text:'Activar todos los servicios y recursos locales necesarios en la gestión de la emergencia.',zone:'dir'},{id:'c6',text:'Convocar a los componentes del CECOPAL que considere necesario.',zone:'dir'},{id:'c7',text:'Constituir y ejercer la dirección del CECOPAL.',zone:'dir'},{id:'c8',text:'Decidir en cada momento, con el consejo del Comité Asesor, las actuaciones más convenientes para hacer frente a la emergencia.',zone:'dir'},{id:'c9',text:'Determinar las medidas de protección a la población (confinamiento, alejamiento o evacuación).',zone:'dir'},{id:'c10',text:'Determinar la información que debe facilitarse a la población.',zone:'dir'},{id:'c11',text:'Facilitar el avituallamiento de víveres y artículos de primera necesidad.',zone:'dir'},{id:'c12',text:'Declarar el final de la emergencia.',zone:'dir'},{id:'c13',text:'EXTRA: Funciones del Gabinete de Información si este no se constituye.',zone:'dir'},{id:'c14',text:'Asesorar a la Dirección del PAM IF, directamente y como miembro y coordinador del Comité Asesor.',zone:'dirTec'},{id:'c15',text:'Asumir la responsabilidad técnica del PAM IF.',zone:'dirTec'},{id:'c16',text:'Confirmar la fase de activación operativa del PAM IF declarada por la Jefatura de Guardia del DBPIEPC y proponer su activación formal a la Dirección.',zone:'dirTec'},{id:'c17',text:'Coordinar las actuaciones de los grupos locales decididas en el CECOPAL con las de los grupos en el PMA.',zone:'dirTec'},{id:'c18',text:'Recopilar la información necesaria sobre la emergencia desde el ámbito de sus competencias.',zone:'comite'},{id:'c19',text:'Evaluar la situación de riesgo en cada momento y prever las posibles consecuencias.',zone:'comite'},{id:'c20',text:'Asesorar a la Dirección y a la Dirección Técnica del PAM IF sobre los recursos humanos y materiales que deben asignarse a la emergencia en función de su gravedad.',zone:'comite'},{id:'c21',text:'Asesorar a la Dirección y a la Dirección Técnica del PAM IF sobre las medidas de protección a la población que se consideren necesarias.',zone:'comite'},{id:'c22',text:'Cada Jefatura de Grupo Local transmitirá las instrucciones decididas desde el CECOPAL a los coordinadores de sus respectivos grupos locales de actuación en el PMA.',zone:'comite'},{id:'c23',text:'Cada Jefatura de Grupo Local coordinará al resto de servicios municipales con funciones relacionadas con la principal del grupo aunque no estuvieran contemplados como recursos esenciales en el presente PAM IF.',zone:'comite'},{id:'c24',text:'Recibir y transmitir la información sobre la preemergencia y la emergencia a la Dirección y Dirección técnica del PAM IF.',zone:'cecom'},{id:'c25',text:'Recibir la información relevante de la emergencia desde el PMA.',zone:'cecom'},{id:'c26',text:'Mantener contacto y coordinar los distintos centros de comunicación municipales (Sala 092-Policía Local, Centro de Gestión de Tráfico, CECOM del DBPIEPC, Sala de Telecontrol y Telemando del Ciclo Integral del Agua) y extra municipales necesarios en su caso.',zone:'cecom'},{id:'c27',text:'Transmitir las órdenes de actuación del CECOPAL.',zone:'cecom'},{id:'c28',text:'Localizar a las personas, medios y recursos adscritos al PAM IF que haya ordenado su Dirección.',zone:'cecom'},{id:'c29',text:'Mantener constancia escrita de la gestión realizada por parte de la Central de Comunicaciones/CECOPAL.',zone:'cecom'},{id:'c30',text:'Asumir la Dirección Técnica de la Extinción.',zone:'pma'},{id:'c31',text:'Ubicar y constituir el PMA según criterios de seguridad, accesibilidad, espacio, posibilidad de observación, facilidad de acceso al incendio y acceso a las comunicaciones.',zone:'pma'},{id:'c32',text:'Evaluar el incendio, comunicando a la Central de Comunicaciones Municipal y al CCE Generalitat la evolución del mismo, su gravedad y la propuesta de situación de emergencia 1 o 2.',zone:'pma'},{id:'c33',text:'Comunicar a la Dirección del PAM IF y a la Dirección Técnica la situación del incendio y las actuaciones que se llevan a cabo.',zone:'pma'},{id:'c34',text:'Constituir, si lo considera necesario, un Centro de Recepción de Medios (CRM).',zone:'pma'},{id:'c35',text:'Definir el plan de extinción con las medidas y estrategias a adoptar, estableciéndolo por escrito en incendios con duración superior a las 24 horas.',zone:'pma'},{id:'c36',text:'En incendios sectorizados, designar a un responsable para mantener comunicación con la Aeronave de Coordinación, preferentemente a través de radio "Banda Aérea" o del "Grupo de Coordinación".',zone:'pma'},{id:'c37',text:'En los casos de alejamiento o evacuación, activar al Grupo Local de Acción Social para que coordine las labores de atención a la población afectada.',zone:'pma'},{id:'c38',text:'Dar por estabilizado, controlado y extinguido el incendio.',zone:'pma'},{id:'c39',text:'Canalizar las órdenes del CECOPAL a las personas encargadas de la coordinación de los Grupos Locales.',zone:'pma'}]},pte:{zones:[{id:'cecopal',label:'CECOPAL'},{id:'dir',label:'Director del Plan'},{id:'comite',label:'Comité Asesor'},{id:'gabinete',label:'Gabinete de Información'},{id:'cecom',label:'CECOM'},{id:'cce',label:'CCE Generalitat'},{id:'pma',label:'PMA'}],cards:[{id:'p1',text:'Gestionar y canalizar los recursos municipales de forma coordinada con el PMA.',zone:'cecopal'},{id:'p2',text:'Coordinar el sistema de avisos a la población y otras medidas de protección.',zone:'cecopal'},{id:'p3',text:'Preemergencia: Recibir la declaración de preemergencia y alertar a los recursos municipales.',zone:'dir'},{id:'p4',text:'Preemergencia: Proporcionar información de retorno al CCE.',zone:'dir'},{id:'p5',text:'Emergencia: Convocar a los miembros del Comité Asesor, el Gabinete de Información y activar todos los servicios y recursos municipales necesarios.',zone:'dir'},{id:'p6',text:'Decidir en cada momento y con el consejo del Comité Asesor, las actuaciones más convenientes para hacer frente a la situación de emergencia y la aplicación de las medidas de protección.',zone:'dir'},{id:'p7',text:'Proponer la orden de evacuación al Director del Plan Especial, o en casos de urgencia, ordenarla.',zone:'dir'},{id:'p8',text:'Dar las instrucciones para el avituallamiento de víveres y artículos de primera necesidad.',zone:'dir'},{id:'p9',text:'Mantener la comunicación con el CCE/CECOPI y solicitar, en su caso, la intervención de medios y recursos externos al municipio.',zone:'dir'},{id:'p10',text:'Determinar, coordinar y facilitar la información a la población durante la emergencia, a través de los medios propios del PTM y los medios de comunicación social de ámbito local.',zone:'dir'},{id:'p11',text:'Establecer prioridades, y ordenar las actuaciones necesarias para la restitución de los servicios básicos y la vuelta a la normalidad.',zone:'dir'},{id:'p12',text:'Declarar el fin de la emergencia.',zone:'dir'},{id:'p13',text:'Asegurar el mantenimiento de la operatividad del Plan.',zone:'dir'},{id:'p14',text:'Aconsejar al Director del Plan sobre las medidas de protección a la población que se consideren necesarias.',zone:'comite'},{id:'p15',text:'Aconsejar al Director del Plan sobre los recursos humanos y materiales que deben asignarse a la emergencia en función de su tipo y gravedad.',zone:'comite'},{id:'p16',text:'Evaluar la situación de riesgo.',zone:'comite'},{id:'p17',text:'Recopilar la información y elaborar los informes sobre la gestión de la emergencia desde el ámbito de sus competencias.',zone:'comite'},{id:'p18',text:'Elaborar y coordinar la difusión de órdenes, consignas y consejos a la población.',zone:'gabinete'},{id:'p19',text:'Centralizar, coordinar y preparar la información general sobre la emergencia y facilitarla a los medios locales de comunicación social.',zone:'gabinete'},{id:'p20',text:'Informar sobre la emergencia a cuantas personas u organismos lo soliciten.',zone:'gabinete'},{id:'p21',text:'Facilitar información relativa a posibles afectados, facilitando los contactos familiares y la localización de personas.',zone:'gabinete'},{id:'p22',text:'Recibir y transmitir las notificaciones y alertas al Director del Plan.',zone:'cecom'},{id:'p23',text:'Recibir y transmitir la información general.',zone:'cecom'},{id:'p24',text:'Transmitir las órdenes de actuación.',zone:'cecom'},{id:'p25',text:'Localizar a las personas, medios y recursos adscritos al Plan.',zone:'cecom'},{id:'p26',text:'Mantener constancia escrita de la gestión del Centro de Comunicaciones.',zone:'cecom'},{id:'p27',text:'Recepción vía telefónica y/o vía radio de todo flujo de información y peticiones provenientes de las zonas afectadas.',zone:'cce'},{id:'p28',text:'Planificación de las actuaciones y toma de decisiones.',zone:'cce'},{id:'p29',text:'Enlace vía telefónica y/o vía radio con los PMA y con los Centros de Coordinación de los respectivos Planes Sectoriales para la movilización de los recursos humanos y materiales.',zone:'cce'},{id:'p30',text:'Seguimiento y control de todas las misiones relacionadas con la emergencia llevadas a cabo, bajo la dirección del Director del Plan.',zone:'cce'},{id:'p31',text:'Tratamiento y clasificación de la información.',zone:'cce'},{id:'p32',text:'Ubicar y constituir el PMA.',zone:'pma'},{id:'p33',text:'Determinar la zona de intervención.',zone:'pma'},{id:'p34',text:'Recabar la información sobre la emergencia y su evolución dando cuenta al CECOPAL.',zone:'pma'},{id:'p35',text:'Canalizar las órdenes formales del CECOPAL, respecto a los Coordinadores de las Unidades Básicas.',zone:'pma'},{id:'p36',text:'Coordinar las solicitudes de recursos.',zone:'pma'},{id:'p37',text:'Dependiendo de la evolución de la emergencia, prever los puntos de encuentro para evacuaciones así como lugares de recogida de medios y recursos.',zone:'pma'}]},pamri:{zones:[{id:'cecopal',label:'CECOPAL'},{id:'dir',label:'Director del Plan'},{id:'comite',label:'Comité Asesor'},{id:'gabinete',label:'Gabinete de Información'},{id:'cecom',label:'CECOM'},{id:'pma',label:'PMA'}],cards:[{id:'r1',text:'Gestionar y canalizar los recursos municipales de forma coordinada con el PMA.',zone:'cecopal'},{id:'r2',text:'Coordinar el sistema de avisos a la población y otras medidas de protección.',zone:'cecopal'},{id:'r3',text:'Recibir la información del riesgo y activar el Plan en su fase de preemergencia y/o emergencia.',zone:'dir'},{id:'r4',text:'Convocar a los miembros del Comité Asesor que considere necesarios en cada situación.',zone:'dir'},{id:'r5',text:'Decidir en cada momento, y con el consejo del Comité Asesor, las actuaciones más convenientes para hacer frente a la emergencia, y la aplicación de las medidas de protección a la población, al medio ambiente, a los bienes y al personal adscrito al Plan.',zone:'dir'},{id:'r6',text:'Dar la orden de evacuación, en su caso, o proponerla al Director del Plan Especial.',zone:'dir'},{id:'r7',text:'Facilitar el avituallamiento de víveres y artículos de primera necesidad.',zone:'dir'},{id:'r8',text:'Mantener comunicación con el CCE de Generalitat y solicitar en su caso la intervención de medios y recursos externos al municipio.',zone:'dir'},{id:'r9',text:'Determinar y coordinar la información a la población durante la emergencia, a través de los medios propios del Plan y de los medios locales de comunicación social.',zone:'dir'},{id:'r10',text:'Ordenar las actuaciones pertinentes para restituir la normalidad, una vez finalizada la emergencia.',zone:'dir'},{id:'r11',text:'Declarar el fin de la emergencia.',zone:'dir'},{id:'r12',text:'Asegurar el mantenimiento de la operatividad del Plan.',zone:'dir'},{id:'r13',text:'Designar los componentes del Comité Asesor, del Gabinete de Información y el Director del Puesto de Mando Avanzado.',zone:'dir'},{id:'r14',text:'Recopilar la información necesaria sobre la emergencia desde el ámbito de sus competencias.',zone:'comite'},{id:'r15',text:'Evaluar la situación de riesgo en cada momento y prever las posibles consecuencias.',zone:'comite'},{id:'r16',text:'Asesorar a la Dirección y a la Dirección Técnica del PAM RI sobre los recursos humanos y materiales que deben asignarse a la emergencia en función de su gravedad.',zone:'comite'},{id:'r17',text:'Asesorar a la Dirección y a la Dirección Técnica del PAM RI sobre las medidas de protección a la población que se consideren necesarias.',zone:'comite'},{id:'r18',text:'Cada Jefatura de Grupo Local transmitirá las instrucciones decididas desde el CECOPAL a los coordinadores de sus respectivos grupos locales de actuación en el PMA. Cada Jefatura de Grupo Local coordinará al resto de servicios municipales con funciones relacionadas con la principal del grupo aunque no estuvieran contemplados como recursos esenciales en el presente PAM RI.',zone:'comite'},{id:'r19',text:'Preemergencia: Permanecer localizables para incorporarse al Comité Asesor en caso de constitución del CECOPAL, o para movilizar los medios necesarios adscritos a su Unidad Básica con la mayor celeridad posible.',zone:'comite'},{id:'r20',text:'Emergencia: Recabar la información disponible de la emergencia.',zone:'comite'},{id:'r21',text:'Emergencia: Analizar la situación en cada momento y prever las posibles consecuencias.',zone:'comite'},{id:'r22',text:'Emergencia: Proponer las actuaciones convenientes al Director del Plan.',zone:'comite'},{id:'r23',text:'Emergencia: Dirigir, ordenar y coordinar desde el CECOPAL las distintas actuaciones de las respectivas Unidades Básicas.',zone:'comite'},{id:'r24',text:'Elaborar y coordinar la difusión de órdenes, consignas y consejos a la población.',zone:'gabinete'},{id:'r25',text:'Centralizar, coordinar y preparar la información general sobre la emergencia y facilitarla a los medios locales de comunicación social.',zone:'gabinete'},{id:'r26',text:'Informar sobre la emergencia a cuantas personas u organismos lo soliciten.',zone:'gabinete'},{id:'r27',text:'Facilitar información relativa a posibles afectados, los contactos familiares y la localización de personas.',zone:'gabinete'},{id:'r28',text:'Contactar con el Gabinete de Prensa del CCE de Generalitat para intercambiar y homogeneizar la información.',zone:'gabinete'},{id:'r29',text:'Recordar que se considerará información oficial, fidedigna y contrastada, aquella facilitada directamente por el Gabinete de Información del CCE, único órgano autorizado para emitirla.',zone:'gabinete'},{id:'r30',text:'Recibir y transmitir la información sobre la preemergencia y la emergencia a la Dirección y Dirección técnica del PAM RI.',zone:'cecom'},{id:'r31',text:'Recibir la información relevante de la emergencia desde el PMA.',zone:'cecom'},{id:'r32',text:'Mantener contacto y coordinar los distintos centros de comunicación municipales (Sala 092-Policía Local, Centro de Gestión de Tráfico, Sala de Telecontrol y Telemando del Ciclo Integral del Agua) y extra municipales necesarios en su caso.',zone:'cecom'},{id:'r33',text:'Mantener contacto continuo con el CCE Generalitat para compartir la información que dispongan ambos centros de coordinación y transmitir las solicitudes de medios que decida la Dirección del PAM RI. La información y las solicitudes se canalizarán preferentemente mediante el Sistema Integrado de Gestión de Emergencias y Comunicaciones de la Generalitat (CoordCom).',zone:'cecom'},{id:'r34',text:'Transmitir las órdenes de actuación del CECOPAL.',zone:'cecom'},{id:'r35',text:'Localizar a las personas, medios y recursos adscritos al PAM RI que haya ordenado su Dirección.',zone:'cecom'},{id:'r36',text:'Mantener constancia escrita de la gestión realizada por parte de la Central de Comunicaciones/CECOPAL.',zone:'cecom'},{id:'r37',text:'Preemergencia: Recibir y transmitir la alerta sobre lluvias intensas al Director del Plan, miembros del CECOPAL y resto de personal adscrito al Plan.',zone:'cecom'},{id:'r38',text:'Preemergencia: Transmitir la alerta a los responsables del seguimiento de lluvias (si se dispone de pluviómetros).',zone:'cecom'},{id:'r39',text:'Preemergencia: Trasladar la alerta a los servicios básicos municipales.',zone:'cecom'},{id:'r40',text:'Preemergencia: Efectuar el seguimiento de la evolución de las precipitaciones y caudales en las cuencas de los cauces que discurren por el municipio.',zone:'cecom'},{id:'r41',text:'Preemergencia: Recabar información sobre la evolución de los caudales proporcionada por el servicio responsable del mismo (Unidad Básica de Seguridad, voluntarios).',zone:'cecom'},{id:'r42',text:'Preemergencia: Mantener informado al Director del Plan e informar al CCE de la situación en el municipio, así como recabar información de retorno sobre la situación en las cuencas de los cauces correspondientes.',zone:'cecom'},{id:'r43',text:'Emergencia: Continuar con las labores descritas en preemergencia.',zone:'cecom'},{id:'r44',text:'Emergencia: Convocar a los miembros del CECOPAL que determine el Director del Plan. Trasladar la alerta a los servicios básicos municipales.',zone:'cecom'},{id:'r45',text:'Emergencia: Recabar información sobre el estado de las carreteras que sirven de comunicación con otras poblaciones.',zone:'cecom'},{id:'r46',text:'Emergencia: Recabar información de la Unidad Básica de Seguridad sobre el estado de las vías de comunicación del término.',zone:'cecom'},{id:'r47',text:'Emergencia: Mantener constancia escrita de la gestión del Centro de Comunicaciones. Informar al CCE.',zone:'cecom'},{id:'r48',text:'Ubicar y constituir el PMA en función del desarrollo de la emergencia, buscando un lugar que presente garantías de seguridad. Determinar las zonas de intervención.',zone:'pma'},{id:'r49',text:'Recabar información sobre la emergencia y su evolución dando cuenta al CECOPAL.',zone:'pma'},{id:'r50',text:'Canalizar las órdenes formales del CECOPAL, respecto a los Coordinadores de las Unidades Básicas.',zone:'pma'},{id:'r51',text:'Coordinar las solicitudes de recursos.',zone:'pma'},{id:'r52',text:'Aconsejar al Director del Plan sobre la necesidad de posibles evacuaciones, teniendo en cuenta los puntos de encuentro, las vías de evacuación y los centros de recepción de evacuados previstos en el Plan.',zone:'pma'},{id:'r53',text:'Mantener informado al Centro de Comunicaciones, que informará al Director del Plan y al CCE.',zone:'pma'}]}};
+
+const state={};
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function initPage(pid){
+  const data=DATA[pid];const placed={};
+  data.zones.forEach(z=>placed[z.id]=[]);
+  state[pid]={bank:shuffle(data.cards.map(c=>c.id)),placed,data,fallos:0};
+  renderPage(pid);
+}
+
+function renderPage(pid){
+  const {bank,placed,data,fallos}=state[pid];
+  const el=document.getElementById(pid);
+  const total=data.cards.length;
+  const correct=data.zones.reduce((s,z)=>s+placed[z.id].filter(id=>{const c=data.cards.find(x=>x.id===id);return c&&c.zone===z.id;}).length,0);
+  const wrong=data.zones.reduce((s,z)=>s+placed[z.id].filter(id=>{const c=data.cards.find(x=>x.id===id);return c&&c.zone!==z.id;}).length,0);
+
+  let html=`<div class="header-bar">
+    <div class="stats">
+      <div>Colocadas: <span>${total-bank.length}/${total}</span></div>
+      <div>Correctas: <span style="color:#3b6d11">${correct}</span></div>
+      <div>En rojo: <span style="color:#a32d2d">${wrong}</span></div>
+      <div>Fallos acumulados: <span style="color:#a32d2d">${fallos}</span></div>
+    </div>
+    <button class="reset-btn" onclick="initPage('${pid}')">Reiniciar</button>
+  </div>
+  <div class="table-wrap"><div class="col-table">`;
+
+  data.zones.forEach(z=>{
+    html+=`<div class="col">
+      <div class="col-header">${z.label}</div>
+      <div class="drop-zone" id="zone-${pid}-${z.id}" ondragover="ev(event)" ondrop="drop(event,'${pid}','${z.id}')">`;
+    placed[z.id].forEach(id=>{
+      const c=data.cards.find(x=>x.id===id);
+      const ok=c.zone===z.id;
+      html+=`<div class="card ${ok?'correct':'wrong'}" id="card-${id}" draggable="true" ondragstart="drag(event,'${id}')">
+        <button class="remove-btn" onclick="removeCard('${pid}','${z.id}','${id}')">✕</button>${c.text}</div>`;
+    });
+    html+=`</div></div>`;
+  });
+
+  html+=`</div></div>
+  <hr class="divider">
+  <div class="bank-section">
+    <div class="bank-title">Funciones por colocar</div>
+    <div class="bank" id="bank-${pid}" ondragover="ev(event)" ondrop="drop(event,'${pid}','__bank__')">`;
+  bank.forEach(id=>{
+    const c=data.cards.find(x=>x.id===id);
+    html+=`<div class="card" id="card-${id}" draggable="true" ondragstart="drag(event,'${id}')">${c.text}</div>`;
+  });
+  html+=`</div></div>`;
+  el.innerHTML=html;
+}
+
+let dragging=null;
+function drag(e,id){dragging=id;setTimeout(()=>{const el=document.getElementById('card-'+id);if(el)el.classList.add('dragging');},0)}
+function ev(e){e.preventDefault()}
+function drop(e,pid,zid){
+  e.preventDefault();if(!dragging)return;
+  const s=state[pid];
+  const {bank,placed,data}=s;
+  const card=data.cards.find(c=>c.id===dragging);
+  if(!card){dragging=null;return;}
+  const fromBank=bank.includes(dragging);
+  const bi=bank.indexOf(dragging);if(bi>-1)bank.splice(bi,1);
+  data.zones.forEach(z=>{const i=placed[z.id].indexOf(dragging);if(i>-1)placed[z.id].splice(i,1);});
+  if(zid==='__bank__'){bank.push(dragging);}
+  else{
+    placed[zid].push(dragging);
+    if(fromBank && card.zone!==zid) s.fallos++;
+  }
+  dragging=null;renderPage(pid);
+}
+function removeCard(pid,zid,id){
+  const {bank,placed}=state[pid];
+  const i=placed[zid].indexOf(id);if(i>-1){placed[zid].splice(i,1);bank.unshift(id);}
+  renderPage(pid);
+}
+function showPage(id){
+  document.querySelectorAll('.tab').forEach((t,i)=>{const p=['pamif','pte','pamri'];t.classList.toggle('active',p[i]===id);});
+  document.querySelectorAll('.page').forEach(p=>{p.classList.toggle('active',p.id===id);});
+  if(!state[id])initPage(id);
+}
+initPage('pamif');
+</script>
+</body>
+</html>
+title><!DOCTYPE html>
 <html lang="es">
 <head><!DOCTYPE html>
 <html lang="es">
