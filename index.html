@@ -1,5 +1,632 @@
 <!DOCTYPE html>
+<html lang="es"><!DOCTYPE html>
 <html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Quiz SPEIS Valencia</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --fire-red:#C0392B;--fire-orange:#E67E22;--fire-amber:#F39C12;
+  --dark-bg:#0d0d0d;--panel-bg:rgba(18,18,18,0.92);--panel-border:rgba(192,57,43,0.35);
+  --text-primary:#F0EDE8;--text-secondary:#A89A8A;--text-muted:#6B5E52;
+  --input-bg:rgba(255,255,255,0.06);--input-border:rgba(255,255,255,0.12);
+  --correct:#27AE60;--wrong:#C0392B;
+}
+html,body{min-height:100vh;font-family:'Barlow',sans-serif;background:#0d0d0d;color:var(--text-primary);overflow-x:hidden}
+
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 110%,rgba(192,57,43,0.22) 0%,transparent 65%),
+    radial-gradient(ellipse 40% 30% at 80% 90%,rgba(230,126,34,0.12) 0%,transparent 60%),
+    radial-gradient(ellipse 30% 25% at 20% 95%,rgba(243,156,18,0.10) 0%,transparent 55%),#0d0d0d;
+}
+body::after{
+  content:'';position:fixed;bottom:0;left:0;right:0;height:280px;z-index:0;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 280' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='f1' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23C0392B' stop-opacity='0.5'/%3E%3Cstop offset='1' stop-color='%23F39C12' stop-opacity='0'/%3E%3C/linearGradient%3E%3ClinearGradient id='f2' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23E67E22' stop-opacity='0.4'/%3E%3Cstop offset='1' stop-color='%23F39C12' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23f1)' d='M0,280 C60,240 100,180 160,200 C220,220 250,140 320,120 C390,100 420,160 500,140 C580,120 610,60 680,80 C750,100 780,170 860,150 C940,130 970,80 1040,100 C1110,120 1150,200 1200,180 L1200,280Z'/%3E%3Cpath fill='url(%23f2)' d='M0,280 C80,260 120,200 200,220 C280,240 310,160 400,140 C490,120 520,180 600,160 C680,140 710,80 790,90 C870,100 910,170 980,155 C1050,140 1100,190 1200,200 L1200,280Z' opacity='0.7'/%3E%3C/svg%3E") bottom/100% auto no-repeat;
+  animation:flicker 4s ease-in-out infinite alternate;pointer-events:none;
+}
+@keyframes flicker{0%{transform:scaleY(1) translateY(0);opacity:1}50%{transform:scaleY(1.04) translateY(-6px);opacity:.85}100%{transform:scaleY(0.97) translateY(3px);opacity:.95}}
+
+/* ── PROFILE SCREEN ── */
+#profile-screen{
+  position:fixed;inset:0;z-index:100;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:#0d0d0d;
+}
+#profile-screen::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 50% at 50% 100%,rgba(192,57,43,0.3) 0%,transparent 70%);
+  pointer-events:none;
+}
+.profile-logo{font-size:56px;margin-bottom:12px;filter:drop-shadow(0 0 24px rgba(230,126,34,0.7));animation:pulse-flame 2.5s ease-in-out infinite}
+@keyframes pulse-flame{0%,100%{filter:drop-shadow(0 0 8px rgba(230,126,34,0.5))}50%{filter:drop-shadow(0 0 24px rgba(243,156,18,0.9))}}
+.profile-title{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--text-primary);margin-bottom:4px;position:relative;z-index:1}
+.profile-subtitle{font-size:12px;color:var(--text-muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:48px;position:relative;z-index:1}
+.profile-cards{display:flex;gap:20px;position:relative;z-index:1;flex-wrap:wrap;justify-content:center}
+.profile-card{
+  background:var(--panel-bg);border:0.5px solid var(--panel-border);border-radius:16px;
+  padding:32px 40px;text-align:center;cursor:pointer;
+  transition:all .2s;backdrop-filter:blur(12px);min-width:160px;
+}
+.profile-card:hover{border-color:var(--fire-orange);background:rgba(230,126,34,0.08);transform:translateY(-4px)}
+.profile-card:active{transform:scale(0.97)}
+.profile-avatar{
+  width:64px;height:64px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;
+  margin:0 auto 14px;
+}
+.avatar-j{background:rgba(192,57,43,0.2);color:#E74C3C;border:1.5px solid rgba(192,57,43,0.4)}
+.avatar-t{background:rgba(230,126,34,0.2);color:var(--fire-orange);border:1.5px solid rgba(230,126,34,0.4)}
+.profile-name{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--text-primary)}
+.profile-stats-preview{font-size:12px;color:var(--text-muted);margin-top:6px}
+
+/* ── MAIN APP ── */
+#main-app{position:relative;z-index:1;max-width:840px;margin:0 auto;padding:24px 16px 80px;display:none}
+
+header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;gap:16px;flex-wrap:wrap}
+.logo-area{display:flex;align-items:center;gap:14px}
+.flame-icon{font-size:36px;line-height:1;filter:drop-shadow(0 0 12px rgba(230,126,34,0.6));animation:pulse-flame 2.5s ease-in-out infinite}
+.logo-text h1{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;letter-spacing:1px;color:var(--text-primary);line-height:1;text-transform:uppercase}
+.logo-text p{font-size:11px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-top:3px}
+.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.active-profile{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(230,126,34,0.1);border:0.5px solid rgba(230,126,34,0.25);
+  border-radius:20px;padding:5px 12px 5px 6px;cursor:pointer;transition:all .15s;
+}
+.active-profile:hover{background:rgba(230,126,34,0.18)}
+.active-profile .mini-avatar{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800}
+.active-profile .pname{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--fire-orange)}
+.active-profile .change-lbl{font-size:10px;color:var(--text-muted);letter-spacing:.5px}
+.daily-quote{background:rgba(192,57,43,0.1);border:0.5px solid rgba(192,57,43,0.25);border-radius:8px;padding:9px 13px;max-width:260px;text-align:right}
+.quote-label{font-size:10px;color:var(--fire-orange);letter-spacing:2px;text-transform:uppercase;margin-bottom:3px;font-family:'Barlow Condensed',sans-serif;font-weight:600}
+.quote-text{font-size:11px;color:var(--text-secondary);line-height:1.5;font-style:italic}
+
+.tabs{display:flex;gap:0;border-bottom:1px solid rgba(192,57,43,0.2);margin-bottom:20px}
+.tab{padding:10px 24px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);cursor:pointer;border-bottom:3px solid transparent;background:none;border-top:none;border-left:none;border-right:none;transition:all .2s}
+.tab:hover:not(.active){color:var(--text-secondary)}
+.tab.active{color:var(--fire-orange);border-bottom:3px solid var(--fire-orange)}
+
+.stats-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.stat{background:var(--panel-bg);border:0.5px solid var(--panel-border);border-radius:8px;padding:10px 18px;text-align:center;min-width:78px;backdrop-filter:blur(8px)}
+.stat-num{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;color:var(--text-primary)}
+.stat-num.green{color:var(--correct)}.stat-num.red{color:var(--wrong)}.stat-num.orange{color:var(--fire-orange)}
+.stat-lbl{font-size:10px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.progress-info{font-size:12px;color:var(--text-muted);margin-bottom:14px;letter-spacing:1px;text-transform:uppercase}
+
+.quiz-card{background:var(--panel-bg);border:0.5px solid var(--panel-border);border-radius:12px;padding:26px;margin-bottom:14px;backdrop-filter:blur(12px);box-shadow:0 8px 32px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.04);animation:card-in .25s ease}
+@keyframes card-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.item-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;gap:12px}
+.item-name{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;letter-spacing:.5px;color:var(--text-primary);border-left:3px solid var(--fire-orange);padding-left:14px;line-height:1.2;flex:1}
+
+.map-btn{
+  display:flex;align-items:center;justify-content:center;
+  width:38px;height:38px;border-radius:8px;flex-shrink:0;
+  background:rgba(230,126,34,0.1);border:0.5px solid rgba(230,126,34,0.3);
+  cursor:pointer;transition:all .15s;color:var(--fire-orange);text-decoration:none;
+  font-size:18px;
+}
+.map-btn:hover{background:rgba(230,126,34,0.25);border-color:var(--fire-orange);transform:scale(1.08)}
+.map-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.fields{display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:12px;margin-bottom:18px}
+.field label{display:block;font-size:10px;color:var(--fire-orange);letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:700;margin-bottom:6px}
+.field input{width:100%;padding:10px 12px;font-size:15px;font-family:'Barlow',sans-serif;background:var(--input-bg);border:0.5px solid var(--input-border);border-radius:6px;color:var(--text-primary);outline:none;transition:border .15s,background .15s}
+.field input::placeholder{color:var(--text-muted)}
+.field input:focus{border-color:rgba(230,126,34,0.5);background:rgba(255,255,255,0.08)}
+.field input.correct{border-color:var(--correct);background:rgba(39,174,96,0.1)}
+.field input.wrong{border-color:var(--wrong);background:rgba(192,57,43,0.1)}
+
+.btn-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.btn{padding:10px 24px;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border:0.5px solid rgba(230,126,34,0.4);border-radius:6px;cursor:pointer;background:rgba(230,126,34,0.1);color:var(--fire-orange);transition:all .15s}
+.btn:hover{background:rgba(230,126,34,0.2);border-color:var(--fire-orange)}
+.btn.primary{background:var(--fire-red);color:#fff;border-color:var(--fire-red)}
+.btn.primary:hover{background:#a93226;border-color:#a93226}
+.btn:active{transform:scale(0.97)}
+.feedback{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;letter-spacing:1px}
+.feedback.ok{color:var(--correct)}.feedback.fail{color:var(--wrong)}
+.enter-hint{font-size:11px;color:var(--text-muted);margin-left:auto;letter-spacing:.5px}
+
+.answer-reveal{margin-top:4px;margin-bottom:14px;padding:12px 16px;background:rgba(192,57,43,0.08);border:0.5px solid rgba(192,57,43,0.2);border-radius:8px;font-size:14px;line-height:2;color:var(--text-secondary)}
+.answer-reveal strong{color:var(--fire-amber)}
+
+/* ── NOTAS ── */
+.notes-area{border-top:0.5px solid rgba(255,255,255,0.06);padding-top:14px}
+.notes-label{font-size:10px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.notes-label svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.6}
+.notes-input{width:100%;padding:9px 12px;font-size:13px;font-family:'Barlow',sans-serif;background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.08);border-radius:6px;color:var(--text-secondary);outline:none;resize:none;transition:border .15s,background .15s;line-height:1.5}
+.notes-input::placeholder{color:var(--text-muted)}
+.notes-input:focus{border-color:rgba(230,126,34,0.3);background:rgba(255,255,255,0.06);color:var(--text-primary)}
+.notes-saved{font-size:10px;color:var(--text-muted);margin-top:4px;opacity:0;transition:opacity .3s;letter-spacing:.5px}
+.notes-saved.show{opacity:1}
+
+/* ── HISTORY ── */
+.history-section{background:var(--panel-bg);border:0.5px solid var(--panel-border);border-radius:12px;padding:18px 22px;backdrop-filter:blur(8px)}
+.history-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);display:flex;align-items:center;gap:8px;cursor:pointer;transition:color .15s}
+.history-title:hover{color:var(--text-secondary)}
+.history-title svg{transition:transform .2s;width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2}
+.history-title.open svg{transform:rotate(180deg)}
+.history-list{margin-top:12px;display:none}
+.history-list.open{display:block}
+.history-item{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:0.5px solid rgba(255,255,255,0.05);font-size:13px;color:var(--text-secondary)}
+.history-item:last-child{border-bottom:none}
+.err-badges{display:flex;gap:6px;align-items:center}
+.badge{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;padding:2px 8px;border-radius:20px}
+.badge.ok{background:rgba(39,174,96,0.15);color:#27AE60}
+.badge.fail{background:rgba(192,57,43,0.15);color:#E74C3C}
+.badge.fail.zero{background:rgba(39,174,96,0.1);color:#27AE60}
+
+@media(max-width:600px){
+  .fields{grid-template-columns:1fr 1fr}
+  .fields .field:last-child{grid-column:1/-1}
+  header{flex-direction:column}
+  .daily-quote{max-width:100%;text-align:left}
+  .header-right{align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<!-- PROFILE SCREEN -->
+<div id="profile-screen">
+  <div class="profile-logo">🔥</div>
+  <div class="profile-title">Quiz SPEIS Valencia</div>
+  <div class="profile-subtitle">Selecciona tu perfil</div>
+  <div class="profile-cards">
+    <div class="profile-card" onclick="selectProfile('Josep')">
+      <div class="profile-avatar avatar-j" id="avatar-Josep">J</div>
+      <div class="profile-name">Josep</div>
+      <div class="profile-stats-preview" id="preview-Josep">Cargando...</div>
+    </div>
+    <div class="profile-card" onclick="selectProfile('Tudon')">
+      <div class="profile-avatar avatar-t" id="avatar-Tudon">T</div>
+      <div class="profile-name">Tudón</div>
+      <div class="profile-stats-preview" id="preview-Tudon">Cargando...</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="main-app">
+  <header>
+    <div class="logo-area">
+      <div class="flame-icon">🔥</div>
+      <div class="logo-text">
+        <h1>Quiz SPEIS</h1>
+        <p>Valencia · Parques de bomberos</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="active-profile" onclick="goToProfiles()">
+        <div class="mini-avatar avatar-j" id="header-avatar">J</div>
+        <div>
+          <div class="pname" id="header-pname">Josep</div>
+          <div class="change-lbl">cambiar perfil</div>
+        </div>
+      </div>
+      <div class="daily-quote">
+        <div class="quote-label">Frase del día</div>
+        <div class="quote-text" id="daily-quote-text">...</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="tabs" id="tabs"></div>
+  <div class="stats-bar" id="stats-bar"></div>
+  <div class="progress-info" id="progress-info"></div>
+
+  <div class="quiz-card" id="quiz-card">
+    <div class="item-header">
+      <div class="item-name" id="item-name">Cargando...</div>
+      <div style="display:flex;gap:8px;flex-shrink:0">
+        <a class="map-btn" id="gmaps-btn" href="#" target="_blank" rel="noopener noreferrer" title="Ver en Google Maps">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        </a>
+        <a class="map-btn" style="opacity:0.7" href="https://drive.google.com/open?id=1R88MlU7ELAWVJZfPpJn3WsWmIt0&usp=sharing" target="_blank" rel="noopener noreferrer" title="Ver zonas de parques">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        </a>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field">
+        <label>1ª Salida</label>
+        <input type="text" id="f-p1" placeholder="parque" autocomplete="off" autocorrect="off" spellcheck="false"/>
+      </div>
+      <div class="field">
+        <label>2ª Salida</label>
+        <input type="text" id="f-p2" placeholder="parque" autocomplete="off" autocorrect="off" spellcheck="false"/>
+      </div>
+      <div class="field">
+        <label>Calle / Dirección</label>
+        <input type="text" id="f-dir" placeholder="nombre de la calle" autocomplete="off" autocorrect="off" spellcheck="false"/>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn primary" id="btn-check" onclick="checkAnswer()">Comprobar</button>
+      <button class="btn" id="btn-next" onclick="nextItem()" style="display:none">Siguiente →</button>
+      <span class="feedback" id="feedback"></span>
+      <span class="enter-hint">↵ Enter</span>
+    </div>
+    <div class="answer-reveal" id="answer-reveal" style="display:none"></div>
+    <div class="notes-area">
+      <div class="notes-label">
+        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Notas
+      </div>
+      <textarea class="notes-input" id="notes-input" rows="2" placeholder="Añade aquí cualquier anotación sobre este lugar..."></textarea>
+      <div class="notes-saved" id="notes-saved">✓ Guardado</div>
+    </div>
+  </div>
+
+  <div class="history-section">
+    <div class="history-title" id="hist-title" onclick="toggleHistory()">
+      Historial de errores
+      <svg viewBox="0 0 14 14"><path d="M2 5l5 5 5-5"/></svg>
+    </div>
+    <div class="history-list" id="history-list"></div>
+  </div>
+</div>
+
+<script>
+const MAP_URL = 'https://drive.google.com/open?id=1R88MlU7ELAWVJZfPpJn3WsWmIt0&usp=sharing';
+
+const QUOTES = [
+  '«El valiente no es quien no siente miedo, sino quien lo vence.» — Nelson Mandela',
+  '«La disciplina es el puente entre metas y logros.» — Jim Rohn',
+  '«No cuentes los días; haz que los días cuenten.» — Muhammad Ali',
+  '«El éxito es la suma de pequeños esfuerzos repetidos día tras día.» — R. Collier',
+  '«Cada pregunta que estudias hoy es un error que no cometerás mañana.»',
+  '«La preparación es la clave que abre la puerta de la oportunidad.»',
+  '«Un bombero se forja en la constancia, no en un solo día.»',
+  '«Lo que no te matas estudiando hoy, te puede costar la plaza mañana.»',
+  '«Dios no nos ha dado un espíritu de cobardía, sino de poder, amor y dominio propio.» — 2 Tim 1:7',
+  '«Todo lo puedo en Cristo que me fortalece.» — Fil 4:13',
+  '«El que espera en el Señor renovará sus fuerzas; correrá y no se cansará.» — Is 40:31',
+  '«Sé fuerte y valiente. No temas ni te desanimes.» — Jos 1:9',
+  '«La perseverancia hace que lo imposible se vuelva posible.»',
+  '«Conoce tu ciudad mejor que nadie. Eso te salva la vida y salva la de los demás.»',
+  '«Cada parque, cada calle, cada salida — memorízalos como si fueran tu hogar.»',
+  '«Las oposiciones no las gana el más listo, sino el más constante.»',
+  '«Un error en el quiz hoy es un acierto en el examen mañana.»',
+  '«Eres más capaz de lo que crees. Sigue.»',
+  '«La diferencia entre ordinario y extraordinario es ese pequeño extra.»',
+  '«Descansa si es necesario, pero nunca te rindas.»',
+  '«Cada página que estudias te acerca un paso más a la plaza.»',
+  '«El fuego prueba el oro, la adversidad los hombres fuertes.» — Séneca',
+  '«Trabaja duro en silencio; deja que los resultados hablen.»',
+  '«La memoria no es un don, es un hábito. Repite y vencerás.»',
+  '«Un bombero no actúa por suerte. Actúa por preparación.»',
+  '«Cuando flaquees, recuerda por qué empezaste.»',
+  '«La excelencia no es un acto puntual, sino un hábito.» — Aristóteles',
+  '«Confía en el proceso. Los resultados llegan.»',
+  '«Tu plaza te espera. Ve a buscarla.»',
+  '«Esta semana importa. Este repaso importa. Tú importas.»'
+];
+
+const PARQUES_VALID = {
+  'campanar':['campanar','camp'],
+  'oeste':['oeste','west','oste'],
+  'norte':['norte','north','nort'],
+  'central':['central','sur','south','centra'],
+  'cpbv':['cpbv','cp']
+};
+
+const DATA = {
+  hospitales:[
+    {n:'9 de Octubre',p1:'campanar',p2:'oeste',dir:'Av. Vall de la Ballestera',dir_alt:['avenida vall de la ballestera','av vall de la ballestera','vall de la ballestera']},
+    {n:'Arnau de Vilanova',p1:'campanar',p2:'oeste',dir:'C/ San Clement',dir_alt:['san clement','calle san clement','san clemente','c/ san clemente','c san clement']},
+    {n:'IVO - Oncología',p1:'campanar',p2:'oeste',dir:'C/ Profesor Beltrán Báguena',dir_alt:['profesor beltran baguena','c/ profesor beltran baguena','prof beltran baguena','beltran baguena']},
+    {n:'La Fe - Centro de Salud (antigua)',p1:'campanar',p2:'oeste',dir:'Av. Campanar',dir_alt:['avenida campanar','av campanar','campanar']},
+    {n:'La Salud',p1:'norte',p2:'central',dir:'C/ Manuel Candela',dir_alt:['manuel candela','calle manuel candela','c manuel candela']},
+    {n:'Clínico Universitario',p1:'norte',p2:'central',dir:'Av. Blasco Ibáñez',dir_alt:['blasco ibanez','av blasco ibanez','avenida blasco ibanez','blasco ibáñez']},
+    {n:'Fontilles',p1:'norte',p2:'central',dir:'Plaza Tetuán',dir_alt:['plaza tetuan','tetuan','tetuán']},
+    {n:'La Malvarrosa',p1:'norte',p2:'central',dir:'Av. Isabel de Villena',dir_alt:['isabel de villena','av isabel de villena','avenida isabel de villena']},
+    {n:'Quirón Valencia',p1:'norte',p2:'central',dir:'Av. Blasco Ibáñez',dir_alt:['blasco ibanez','av blasco ibanez','avenida blasco ibanez']},
+    {n:'Valencia al Mar',p1:'norte',p2:'central',dir:'C/ Río Tajo',dir_alt:['rio tajo','c/ rio tajo','calle rio tajo','río tajo']},
+    {n:'Doctor Peset',p1:'oeste',p2:'central',dir:'Av. Gaspar Aguilar',dir_alt:['gaspar aguilar','av gaspar aguilar','avenida gaspar aguilar']},
+    {n:'General Universitario',p1:'oeste',p2:'campanar',dir:'Av. Tres Cruces',dir_alt:['tres cruces','av tres cruces','avenida tres cruces']},
+    {n:'Pare Jofré',p1:'oeste',p2:'central',dir:'C/ San Lázaro',dir_alt:['san lazaro','c/ san lazaro','calle san lazaro','san lázaro']},
+    {n:'Vithas / Virgen del Consuelo',p1:'oeste',p2:'central',dir:"C/ Callosa d'en Sarrià",dir_alt:["callosa d'en sarria","callosa den sarria","c/ callosa den sarria","callosa sarria"]},
+    {n:'IMED Colón',p1:'central',p2:'norte',dir:'C/ Isabel la Católica',dir_alt:['isabel la catolica','calle isabel la catolica','c/ isabel la católica','isabel la católica']},
+    {n:'IMSKE',p1:'central',p2:'norte',dir:'C/ Suiza',dir_alt:['suiza','calle suiza','c suiza']},
+    {n:'La Fe (nueva)',p1:'central',p2:'oeste',dir:'Av. Fernando Abril Martorell',dir_alt:['fernando abril martorell','av fernando abril martorell','avenida fernando abril martorell']},
+    {n:'Centro de Recuperación de Levante',p1:'cpbv',p2:'campanar',dir:'Autovía de Ademuz',dir_alt:['autovia de ademuz','autopista de ademuz','ademuz']},
+  ],
+  museos:[
+    {n:'Museo del Artista Fallero',p1:'campanar',p2:'oeste',dir:'Av. de Sant Josep Artesà',dir_alt:['av sant josep artesa','avenida sant josep artesa','sant josep artesa']},
+    {n:'Bombas Gens Centro de Artes Digitales',p1:'campanar',p2:'norte',dir:'Av. de Burjassot',dir_alt:['av burjassot','avenida burjassot','burjassot']},
+    {n:'Museo Conchita Piquer',p1:'norte',p2:'campanar',dir:'C/ de Ruaya',dir_alt:['ruaya','c/ ruaya','calle ruaya']},
+    {n:'Casa de la Ciencia de Valencia (CSIC)',p1:'norte',p2:'central',dir:'C/ Bailía',dir_alt:['bailia','c/ bailia','calle bailia','bailía']},
+    {n:'Museo Mariano (MuMa)',p1:'norte',p2:'central',dir:'Plaza de la Mare de Déu',dir_alt:['plaza mare de deu','mare de deu','mare de déu']},
+    {n:'El Almudín',p1:'norte',p2:'central',dir:'Plaza de Sant Lluís Bertran',dir_alt:['plaza sant lluis bertran','sant lluis bertran','sant lluís bertran']},
+    {n:"L'Almoina",p1:'norte',p2:'central',dir:'Plaza de Dècim Juni Brut',dir_alt:['plaza decim juni brut','decim juni brut']},
+    {n:'Palacio del Marqués de Campo (Museo de la Ciudad)',p1:'norte',p2:'central',dir:"Plaza de l'Arquebisbe",dir_alt:["plaza arquebisbe","l'arquebisbe","arquebisbe"]},
+    {n:'Cripta Arqueológica de la Prisión de San Vicente',p1:'norte',p2:'central',dir:"Plaza de l'Arquebisbe",dir_alt:["plaza arquebisbe","arquebisbe","l'arquebisbe"]},
+    {n:'Museo Diocesano de la Catedral de Valencia',p1:'norte',p2:'central',dir:"Plaza de l'Almoina",dir_alt:["plaza almoina","l'almoina","almoina"]},
+    {n:'Palacio de Cervelló',p1:'norte',p2:'central',dir:'Plaza Tetuán',dir_alt:['tetuan','plaza tetuan','tetuán']},
+    {n:'Centro de Arte Hortensia Herrero (CAHH)',p1:'norte',p2:'central',dir:'C/ del Mar',dir_alt:['calle del mar','c/ del mar','del mar']},
+    {n:'Museo Nacional de Cerámica González Martí',p1:'norte',p2:'central',dir:'C/ del Poeta Querol',dir_alt:['poeta querol','c/ poeta querol','calle poeta querol']},
+    {n:'Museu del Patriarca',p1:'norte',p2:'central',dir:'C/ de la Nau',dir_alt:['c/ de la nau','la nau','calle de la nau','nau']},
+    {n:'Museo de Bellas Artes de Valencia',p1:'norte',p2:'central',dir:'C/ de Sant Pius V',dir_alt:['sant pius v','c/ sant pius v','calle sant pius v','san pio v','san pío v']},
+    {n:'Museo de Ciencias Naturales',p1:'norte',p2:'central',dir:'C/ del General Elio',dir_alt:['general elio','c/ general elio','calle general elio']},
+    {n:'Museo Histórico Militar',p1:'norte',p2:'central',dir:'C/ del General Gil Dolz',dir_alt:['general gil dolz','c/ general gil dolz','gil dolz']},
+    {n:'Museo de Informática',p1:'norte',p2:'central',dir:'Camí de Vera',dir_alt:['cami de vera','camino de vera','vera']},
+    {n:'Museo del Juguete',p1:'norte',p2:'central',dir:'Camí de Vera',dir_alt:['cami de vera','camino de vera','vera']},
+    {n:'Casa-Museo de Blasco Ibáñez',p1:'norte',p2:'central',dir:"C/ d'Isabel de Villena",dir_alt:["isabel de villena","c/ d'isabel de villena","c/ isabel de villena"]},
+    {n:'Museo del Arroz de Valencia',p1:'norte',p2:'central',dir:'C/ del Rosari',dir_alt:['del rosari','rosari','rosario']},
+    {n:'Atarazanas del Grao',p1:'norte',p2:'central',dir:'Plaza Juan Antonio Benlliure',dir_alt:['plaza benlliure','benlliure']},
+    {n:'Casa Museo Benlliure',p1:'oeste',p2:'norte',dir:'C/ de la Blanqueria',dir_alt:['blanqueria','c/ blanqueria','calle blanqueria']},
+    {n:'CCCC',p1:'oeste',p2:'norte',dir:'C/ del Museo',dir_alt:['c/ museo','del museo','calle museo','museo']},
+    {n:'Museo del Corpus - Casa de las Rocas',p1:'oeste',p2:'norte',dir:'C/ de les Roques',dir_alt:['les roques','c/ les roques','calle les roques','las rocas']},
+    {n:'Refugio Antiaéreo Calle Serranos',p1:'oeste',p2:'norte',dir:'C/ dels Serrans',dir_alt:['dels serrans','serrans','serranos']},
+    {n:"L'IBER - Museo de los Soldaditos de Plomo",p1:'oeste',p2:'norte',dir:'C/ de Caballeros',dir_alt:['caballeros','c/ caballeros','calle caballeros']},
+    {n:'La Lonja / Consulado del Mar',p1:'oeste',p2:'central',dir:'C/ de la Llotja',dir_alt:['la llotja','llotja','lonja']},
+    {n:'Museo y Colegio del Arte Mayor de la Seda',p1:'oeste',p2:'central',dir:'C/ del Hospital',dir_alt:['del hospital','c/ hospital','hospital']},
+    {n:'MuVIM',p1:'oeste',p2:'central',dir:'C/ de Quevedo',dir_alt:['quevedo','c/ quevedo','calle quevedo']},
+    {n:'IVAM',p1:'oeste',p2:'campanar',dir:'C/ de Guillem de Castro',dir_alt:['guillem de castro','c/ guillem de castro','guillem castro']},
+    {n:'Museo de Etnología (El ETNO)',p1:'oeste',p2:'campanar',dir:'C/ de la Corona',dir_alt:['la corona','c/ de la corona','corona']},
+    {n:'Museo de Prehistoria',p1:'oeste',p2:'campanar',dir:'C/ de la Corona',dir_alt:['la corona','c/ de la corona','corona']},
+    {n:'Museo de la Policía Local de Valencia',p1:'oeste',p2:'campanar',dir:'Av. del Cid',dir_alt:['av del cid','avenida del cid','del cid','cid']},
+    {n:'Museo de Historia de Valencia (MHV)',p1:'oeste',p2:'campanar',dir:'C/ València',dir_alt:['c/ valencia','calle valencia','valencia']},
+    {n:'Sala de Exposiciones del Ayuntamiento',p1:'central',p2:'oeste',dir:"C/ de l'Arquebisbe Mayoral",dir_alt:["arquebisbe mayoral","l'arquebisbe mayoral","c/ arquebisbe mayoral"]},
+    {n:'Refugio Antiaéreo Valencia',p1:'central',p2:'oeste',dir:"C/ de l'Arquebisbe Mayoral",dir_alt:["arquebisbe mayoral","l'arquebisbe mayoral"]},
+    {n:'Museo Histórico Municipal',p1:'central',p2:'oeste',dir:"Plaza de l'Ajuntament",dir_alt:["plaza ajuntament","l'ajuntament","plaza del ayuntamiento"]},
+    {n:'Museo Taurino',p1:'central',p2:'norte',dir:'Passatge Dr. Serra',dir_alt:['pasaje dr serra','pasaje doctor serra','dr serra','doctor serra']},
+    {n:'Museo Fallero',p1:'central',p2:'norte',dir:'Plaza Monteolivete',dir_alt:['monteolivete','plaza monteolivete']},
+    {n:'Museo de las Ciencias Príncipe Felipe',p1:'central',p2:'norte',dir:'Av. del Professor López Piñero',dir_alt:['professor lopez pinero','lopez pinero','av professor lopez pinero','lópez piñero']},
+    {n:'Oceanogràfic València',p1:'central',p2:'norte',dir:"C/ d'Eduardo Primo Yúfera",dir_alt:["eduardo primo yufera","primo yufera","d'eduardo primo yufera"]},
+  ],
+  mercados:[
+    {n:'Benicalap',p1:'campanar',p2:'oeste',dir:'C/ de Miguel Servet',dir_alt:['miguel servet','c/ miguel servet','calle miguel servet']},
+    {n:'Benimamet',p1:'campanar',p2:'oeste',dir:"Plaza d'Alboraig",dir_alt:["plaza alboraig","alboraig","d'alboraig"]},
+    {n:'Mossén Sorell',p1:'oeste',p2:'campanar',dir:'Plaza de Mossén Sorell',dir_alt:['mossen sorell','plaza mossen sorell','mossén sorell']},
+    {n:'Rojas Clemente',p1:'oeste',p2:'campanar',dir:'Plaza de Rojas Clemente',dir_alt:['rojas clemente','plaza rojas clemente']},
+    {n:'Castilla',p1:'oeste',p2:'campanar',dir:'C/ de Llombai',dir_alt:['llombai','c/ llombai','calle llombai']},
+    {n:'Plaza Redonda',p1:'oeste',p2:'central',dir:'Plaza Redonda',dir_alt:['la redonda','plaza redonda']},
+    {n:'Central',p1:'oeste',p2:'central',dir:'Plaza del Mercado',dir_alt:['plaza del mercado','mercado central','plaza mercado','c/ palafox','palafox','plaza del mercat']},
+    {n:'Imprenta',p1:'oeste',p2:'central',dir:'C/ de la Mascota',dir_alt:['la mascota','c/ mascota','calle la mascota','mascota']},
+    {n:'Jesús',p1:'oeste',p2:'central',dir:'Plaza de Jesús',dir_alt:['plaza jesus','jesus','jesús']},
+    {n:'Virgen de la Valvanera',p1:'oeste',p2:'central',dir:'Plaza de Santiago Suárez "Santi"',dir_alt:['santiago suarez','santi','plaza santiago suarez','santiago suárez']},
+    {n:'Torrefiel',p1:'norte',p2:'campanar',dir:'C/ de Sant Domènec Savio',dir_alt:['sant domenec savio','domenec savio','san domenec savio']},
+    {n:'San Pedro Nolasco',p1:'norte',p2:'campanar',dir:'Plaza San Pedro Nolasco',dir_alt:['san pedro nolasco','plaza san pedro nolasco','c/ santa isabel','santa isabel']},
+    {n:'Grao',p1:'norte',p2:'central',dir:'Plaza del Mercat Nou',dir_alt:['mercat nou','plaza mercat nou','mercado nuevo']},
+    {n:'Cabanyal',p1:'norte',p2:'central',dir:'C/ Martí Grajales',dir_alt:['marti grajales','c/ marti grajales','calle marti grajales']},
+    {n:'Algirós',p1:'norte',p2:'central',dir:'Plaza de Sant Felip Neri',dir_alt:['sant felip neri','san felipe neri','plaza sant felip neri','felip neri']},
+    {n:'Ruzafa',p1:'central',p2:'norte',dir:'Plaza del Baró de Cortés',dir_alt:['baro de cortes','plaza baro de cortes','barón de cortés','baron de cortes']},
+    {n:'Colón',p1:'central',p2:'norte',dir:'C/ de Jorge Juan',dir_alt:['jorge juan','c/ jorge juan','calle jorge juan']},
+    {n:'Nazaret',p1:'central',p2:'norte',dir:'C/ Major de Natzaret',dir_alt:['major de natzaret','calle major de natzaret','calle nazaret','nazaret']},
+    {n:'Hortbio Market',p1:'central',p2:'norte',dir:'C/ Fuente en Corts',dir_alt:['fuente en corts','c/ fuente en corts','calle fuente en corts','carrera fuente en corts']},
+    {n:'Mercadillo Jerusalem',p1:'central',p2:'oeste',dir:'C/ del Convent de Jerusalem',dir_alt:['convent de jerusalem','c/ convent de jerusalem','convento de jerusalem','matematico marzal','matemático marzal']},
+    {n:'Mercado Municipal Jerusalén',p1:'central',p2:'oeste',dir:'C/ del Matemàtic Marzal',dir_alt:['matematic marzal','c/ matematic marzal','matemàtic marzal','matematico marzal']},
+  ]
+};
+
+const CATEGORIES = ['hospitales','museos','mercados'];
+const CAT_LABELS = {hospitales:'Hospitales',museos:'Museos',mercados:'Mercados'};
+const PROFILES = ['Josep','Tudon'];
+
+let currentProfile = null;
+let currentCat = 'hospitales';
+let queue = [], current = null, checked = false;
+let history = {}, notes = {}, sessionStats = {};
+
+function storageKey(suffix){ return 'speis_' + currentProfile + '_' + suffix; }
+
+function initProfileData(){
+  CATEGORIES.forEach(c => {
+    history[c] = {};
+    sessionStats[c] = {ok:0, fail:0};
+    DATA[c].forEach(item => { history[c][item.n] = {ok:0, fail:0}; });
+  });
+  notes = {};
+  try {
+    const rh = localStorage.getItem(storageKey('history_v2'));
+    if(rh){ const s=JSON.parse(rh); CATEGORIES.forEach(c=>{ if(s[c]) DATA[c].forEach(item=>{ if(s[c][item.n]) history[c][item.n]=s[c][item.n]; }); }); }
+    const rn = localStorage.getItem(storageKey('notes'));
+    if(rn) notes = JSON.parse(rn);
+  } catch(e){}
+}
+
+function saveHistory(){ try{ localStorage.setItem(storageKey('history_v2'), JSON.stringify(history)); }catch(e){} }
+function saveNotes(){ try{ localStorage.setItem(storageKey('notes'), JSON.stringify(notes)); }catch(e){} }
+
+function getProfilePreview(profile){
+  try{
+    const rh = localStorage.getItem('speis_' + profile + '_history_v2');
+    if(!rh) return 'Sin historial aún';
+    const s = JSON.parse(rh);
+    let totalOk=0, totalFail=0;
+    CATEGORIES.forEach(c=>{ if(s[c]) Object.values(s[c]).forEach(v=>{ totalOk+=v.ok; totalFail+=v.fail; }); });
+    if(totalOk+totalFail===0) return 'Sin historial aún';
+    const pct = Math.round(totalOk/(totalOk+totalFail)*100);
+    return totalOk+totalFail + ' intentos · ' + pct + '% acierto';
+  }catch(e){ return 'Sin historial aún'; }
+}
+
+function selectProfile(profile){
+  currentProfile = profile;
+  initProfileData();
+  document.getElementById('profile-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'block';
+  const isJ = profile === 'Josep';
+  const hdr = document.getElementById('header-avatar');
+  hdr.textContent = profile.charAt(0);
+  hdr.className = 'mini-avatar ' + (isJ ? 'avatar-j' : 'avatar-t');
+  document.getElementById('header-pname').textContent = profile === 'Tudon' ? 'Tudón' : profile;
+  document.getElementById('daily-quote-text').textContent = getDailyQuote();
+  const tabs = document.getElementById('tabs');
+  tabs.innerHTML = CATEGORIES.map(c=>`<button class="tab${c===currentCat?' active':''}" data-cat="${c}" onclick="switchTab('${c}')">${CAT_LABELS[c]}</button>`).join('');
+  buildQueue(); getNext(); updateStats(); renderHistory();
+}
+
+function goToProfiles(){
+  currentProfile = null;
+  document.getElementById('profile-screen').style.display = 'flex';
+  document.getElementById('main-app').style.display = 'none';
+  PROFILES.forEach(p => { document.getElementById('preview-'+p).textContent = getProfilePreview(p); });
+}
+
+function getDailyQuote(){
+  const day = Math.floor(Date.now()/86400000);
+  return QUOTES[day % QUOTES.length];
+}
+
+function normalize(s){
+  return s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[''`]/g,"'").replace(/\s+/g,' ');
+}
+function checkParque(input, correct){
+  const n=normalize(input); if(!n) return false;
+  const corrKey=normalize(correct);
+  const variants=PARQUES_VALID[corrKey]||[corrKey];
+  for(const v of variants) if(n===v||n.startsWith(v)||v.startsWith(n)) return true;
+  return false;
+}
+function checkDir(input, item){
+  const n=normalize(input); if(!n) return false;
+  const mainN=normalize(item.dir);
+  if(n===mainN||mainN.includes(n)||n.includes(mainN)) return true;
+  for(const alt of (item.dir_alt||[])){ const a=normalize(alt); if(n===a||a.includes(n)||n.includes(a)) return true; }
+  const words=n.split(' ').filter(w=>w.length>3);
+  if(words.length>=2){ const allMatch=words.every(w=>mainN.includes(w)||(item.dir_alt||[]).some(a=>normalize(a).includes(w))); if(allMatch) return true; }
+  return false;
+}
+
+function buildQueue(){
+  const items=[...DATA[currentCat]];
+  for(let i=items.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [items[i],items[j]]=[items[j],items[i]]; }
+  queue=items;
+}
+
+let notesTimer = null;
+function getNext(){
+  if(queue.length===0) buildQueue();
+  current=queue.shift(); checked=false;
+  document.getElementById('item-name').textContent=current.n;
+  var mapsUrl='https://www.google.com/maps/search/'+encodeURIComponent(current.dir+', Valencia, España');
+  document.getElementById('gmaps-btn').href=mapsUrl;
+
+  ['p1','p2','dir'].forEach(f=>{ const el=document.getElementById('f-'+f); el.value=''; el.className=''; });
+  document.getElementById('feedback').textContent='';
+  document.getElementById('feedback').className='feedback';
+  document.getElementById('answer-reveal').style.display='none';
+  document.getElementById('btn-next').style.display='none';
+  document.getElementById('btn-check').style.display='';
+  const noteKey = currentCat + '::' + current.n;
+  document.getElementById('notes-input').value = notes[noteKey] || '';
+  document.getElementById('notes-saved').className='notes-saved';
+  document.getElementById('f-p1').focus();
+  updateProgress();
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  const ni = document.getElementById('notes-input');
+  ni.addEventListener('input', ()=>{
+    const noteKey = currentCat + '::' + current.n;
+    notes[noteKey] = ni.value;
+    clearTimeout(notesTimer);
+    notesTimer = setTimeout(()=>{
+      saveNotes();
+      const s = document.getElementById('notes-saved');
+      s.className='notes-saved show';
+      setTimeout(()=>{ s.className='notes-saved'; }, 1500);
+    }, 600);
+  });
+  PROFILES.forEach(p=>{ document.getElementById('preview-'+p).textContent=getProfilePreview(p); });
+});
+
+function checkAnswer(){
+  if(checked) return; checked=true;
+  const v1=document.getElementById('f-p1').value;
+  const v2=document.getElementById('f-p2').value;
+  const vd=document.getElementById('f-dir').value;
+  const ok1=checkParque(v1,current.p1);
+  const ok2=checkParque(v2,current.p2);
+  const okd=checkDir(vd,current);
+  const allOk=ok1&&ok2&&okd;
+  document.getElementById('f-p1').className=ok1?'correct':'wrong';
+  document.getElementById('f-p2').className=ok2?'correct':'wrong';
+  document.getElementById('f-dir').className=okd?'correct':'wrong';
+  const fb=document.getElementById('feedback');
+  if(allOk){
+    fb.textContent='✓ Correcto'; fb.className='feedback ok';
+    history[currentCat][current.n].ok++; sessionStats[currentCat].ok++;
+  } else {
+    fb.textContent='✗ Incorrecto'; fb.className='feedback fail';
+    history[currentCat][current.n].fail++; sessionStats[currentCat].fail++;
+    const p1c=current.p1.charAt(0).toUpperCase()+current.p1.slice(1);
+    const p2c=current.p2.charAt(0).toUpperCase()+current.p2.slice(1);
+    const rev=document.getElementById('answer-reveal');
+    rev.innerHTML=`<strong>Respuesta correcta:</strong><br>1ª salida: <strong>${p1c}</strong> &nbsp;·&nbsp; 2ª salida: <strong>${p2c}</strong> &nbsp;·&nbsp; Dirección: <strong>${current.dir}</strong>`;
+    rev.style.display='block';
+  }
+  document.getElementById('btn-check').style.display='none';
+  document.getElementById('btn-next').style.display='';
+  saveHistory(); updateStats(); renderHistory();
+}
+
+function nextItem(){ getNext(); }
+
+function updateStats(){
+  const bar=document.getElementById('stats-bar');
+  const s=sessionStats[currentCat];
+  const total=s.ok+s.fail;
+  const pct=total?Math.round(s.ok/total*100):0;
+  const allFails=Object.values(history[currentCat]).reduce((a,v)=>a+v.fail,0);
+  bar.innerHTML=`
+    <div class="stat"><div class="stat-num green">${s.ok}</div><div class="stat-lbl">Correctas</div></div>
+    <div class="stat"><div class="stat-num red">${s.fail}</div><div class="stat-lbl">Errores</div></div>
+    <div class="stat"><div class="stat-num orange">${pct}%</div><div class="stat-lbl">Sesión</div></div>
+    <div class="stat"><div class="stat-num">${allFails}</div><div class="stat-lbl">Errores totales</div></div>
+  `;
+}
+
+function updateProgress(){
+  document.getElementById('progress-info').textContent=`${DATA[currentCat].length-queue.length} / ${DATA[currentCat].length} — ${CAT_LABELS[currentCat]}`;
+}
+
+function renderHistory(){
+  const list=document.getElementById('history-list');
+  const sorted=Object.entries(history[currentCat]).filter(([,v])=>v.fail>0||v.ok>0).sort((a,b)=>b[1].fail-a[1].fail);
+  if(sorted.length===0){ list.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:8px 0">Sin historial aún</div>'; return; }
+  list.innerHTML=sorted.map(([name,v])=>`
+    <div class="history-item">
+      <span>${name}</span>
+      <div class="err-badges">
+        <span class="badge ok">✓ ${v.ok}</span>
+        <span class="badge fail ${v.fail===0?'zero':''}">✗ ${v.fail}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleHistory(){
+  const l=document.getElementById('history-list');
+  const t=document.getElementById('hist-title');
+  l.classList.toggle('open'); t.classList.toggle('open');
+}
+
+function switchTab(cat){
+  currentCat=cat; sessionStats[cat]={ok:0,fail:0};
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.cat===cat));
+  buildQueue(); getNext(); updateStats(); renderHistory();
+}
+
+document.addEventListener('keydown', e=>{
+  if(e.target.tagName==='TEXTAREA') return;
+  if(e.key==='Enter'){
+    if(!currentProfile) return;
+    if(!checked) checkAnswer(); else nextItem();
+  }
+});
+</script>
+</body>
+</html>
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
